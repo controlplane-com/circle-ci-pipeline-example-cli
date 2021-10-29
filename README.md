@@ -19,9 +19,11 @@ When triggered, the pipeline will execute the jobs/workflows defined in the `.ci
 
 **Perform the following steps to set up the example:**
 
-1. Fork the example into your own workspace.
+1. Fork or copy the example into your own workspace at one of the supported CircleCI repositories.
 
-2. The following variables are required and must be added as environment variables at CircleCI: 
+2. Connect CircleCI to your workspace and set up the example as a project in CircleCI.
+
+3. The following variables are required and must be added as environment variables at CircleCI: 
    
     Browse to the environment variables page by:
 
@@ -37,22 +39,22 @@ When triggered, the pipeline will execute the jobs/workflows defined in the `.ci
     - `CPLN_TOKEN` Service Account Key from the previous section (masked).
     - `CPLN_IMAGE_NAME`: The name of the image that will be deployed. The pipeline will append the short SHA of the commit as the tag when pushing the image to the org's private image repository.
 
-3. Review the `.circleci/config.yml` file: 
+4. Review the `.circleci/config.yml` file: 
     - This file contains the jobs and workflows that CircleCI will execute when the pipeline is triggered.
     - The `build-and-deploy` job will install the Control Plane CLI, containerize and deploy the sample application.
     - There are two workflows defined in the example to demonstrate pushing to a stage and production environment. Each workflow calls the `build-and-deploy` job with the `environment` parameter set to the value that will be appended to the GVC name based on the branch that triggered the pipeline. The `deploy-to-prod` workflow is manually triggered.
     - The `sed` command is used to substitute the `ORG_NAME`, `GVC_NAME`, `WORKLOAD_NAME` and `IMAGE_NAME_TAG` tokens inside the YAML files in the `/cpln` directory on lines 38-41.
 
-4. The Control Plane YAML files are located in the `/cpln` directory. No changes are required to execute the example.
+5. The Control Plane YAML files are located in the `/cpln` directory. No changes are required to execute the example.
     - The `cpln-gvc.yaml` file defines the GVC to be created/updated.
     - The `cpln-workload.yaml` file defines the workload to be created/updated. 
 
-5. Run the pipeline by:
+6. Run the pipeline by:
     - Committing a change to one of the branches, or
     - Clicking `Projects` in the left menu, then
-    - Click click the current project name and select a branch, 
+    - Click click the current project name and select a branch from the pulldown, 
     - Click the `Run Pipeline` button. A modal will be displayed, click `Run Pipeline`.
-  
+   
 ## Running the App
 
 After the pipeline has successfully deployed the application, it can be tested by following these steps:
