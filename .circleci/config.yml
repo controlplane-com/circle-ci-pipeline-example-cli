@@ -1,0 +1,71 @@
+# Control Plane - CircleCI CI/CD Example
+version: 2.1
+
+jobs:
+  build-and-deploy:
+    parameters:
+      environment:
+        default: "staging"
+        type: string
+    docker:
+      - image: cimg/node:17.0.1
+    steps:
+      # Checkout the code as the first step.
+      - checkout
+      # Set up docker-in-docker
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: Set Image Tag
+          command: |
+            echo 'export IMAGE=${CPLN_IMAGE_NAME}:${CIRCLE_SHA1::7}' >> $BASH_ENV
+      - run:
+          name: Install Control Plane CLI
+          command: |
+            sudo npm install -g @controlplane/cli
+            cpln --version
+      - run:
+          name: Containerize and push app
+          command: |
+            echo $IMAGE
+            cpln profile update default --token ${CPLN_TOKEN}
+            cpln image docker-login
+            cpln image build --name ${IMAGE} --dockerfile ./Dockerfile --push
+      - run:
+          name: Update the tokens in the cpln yml files and run cpln apply
+          command: |
+            cd cpln
+            sed -i "s/ORG_NAME/${CPLN_ORG}/" cpln-gvc.yaml
+            sed -i "s/GVC_NAME/${CPLN_GVC_NAME}-<< parameters.environment >>/" cpln-gvc.yaml
+            sed -i "s/WORKLOAD_NAME/${CPLN_WORKLOAD_NAME}/" cpln-workload.yaml
+            sed -i "s/IMAGE_NAME_TAG/${IMAGE}/" cpln-workload.yaml
+            cpln apply -f cpln-gvc.yaml
+            cpln apply -f cpln-workload.yaml --gvc ${CPLN_GVC_NAME}-<< parameters.environment >>
+
+workflows:
+  deploy-to-staging:
+    jobs:
+      - build-and-deploy:
+          name: staging-build-and-deploy
+          environment: staging 
+          filters:
+            branches:
+              only: staging        
+  deploy-to-prod:
+    jobs:
+      - hold:
+          name: production-approval
+          type: approval
+          filters:
+            branches:
+              only: main
+      - build-and-deploy:
+          name: production-build-and-deploy
+          environment: production
+          requires:
+            - production-approval
+          filters:
+            branches:
+              only: main
+         
+
