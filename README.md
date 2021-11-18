@@ -1,4 +1,4 @@
-# Control Plane - CicleCI Pipeline Example Using the CLI
+# Control Plane - CircleCI Pipeline Example Using the CLI
 
 This example demonstrates building and deploying an app to Control Plane using the CLI (cpln) as part of a CI/CD pipeline at [CircleCI](https://circleci.com/).
 
